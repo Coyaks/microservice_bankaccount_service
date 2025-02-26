@@ -1,6 +1,8 @@
 package com.skoy.bootcamp_microservices.controller;
 
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
+import com.skoy.bootcamp_microservices.dto.CustomerDTO;
+import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
 import com.skoy.bootcamp_microservices.service.IBankAccountService;
 import com.skoy.bootcamp_microservices.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +33,14 @@ public class BankAccountController {
     }
 
     @GetMapping("/{id}")
-    public Mono<BankAccountDTO> findById(@PathVariable String id) {
+    public Mono<ApiResponse<BankAccountDTO>> findById(@PathVariable String id) {
         logger.info("Fetching bank_accounts with ID: {}", id);
         return service.findById(id)
-                .doOnNext(customer -> logger.info("bank_accounts found: {}", customer))
+                .map(customer -> {
+                    logger.info("bank_accounts found: {}", customer);
+                    return new ApiResponse<>("Cliente encontrado", customer, 200);
+                })
+                .switchIfEmpty(Mono.just(new ApiResponse<>("Cliente no encontrado", null, 404)))
                 .doOnError(e -> logger.error("Error fetching bank_accounts with ID: {}", id, e));
     }
 
@@ -80,5 +86,15 @@ public class BankAccountController {
                 });
     }
 
+    @GetMapping("/types")
+    public AccountTypeEnum[] getAllBankAccountTypes() {
+        return AccountTypeEnum.values();
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public Flux<BankAccountDTO> findAllBankAccountsByCustomerId(@PathVariable String customerId) {
+        logger.info("Fetching all bank_accounts by customer ID: {}", customerId);
+        return service.findAllAccountByCustomerId(customerId);
+    }
 
 }

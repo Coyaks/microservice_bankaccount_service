@@ -2,6 +2,9 @@ package com.skoy.bootcamp_microservices.service;
 
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
 import com.skoy.bootcamp_microservices.dto.CustomerDTO;
+import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
+import com.skoy.bootcamp_microservices.enums.CustomerTypeEnum;
+import com.skoy.bootcamp_microservices.mapper.BankAccountMapper;
 import com.skoy.bootcamp_microservices.model.BankAccount;
 import com.skoy.bootcamp_microservices.repository.IBankAccountRepository;
 import com.skoy.bootcamp_microservices.utils.ApiResponse;
@@ -16,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,21 +33,43 @@ public class BankAccountService implements IBankAccountService {
     private String customerServiceUrl;
 
     @Override
-    public Mono<BankAccountDTO> create(BankAccountDTO accountDTO) {
+    public Mono<BankAccountDTO> create(BankAccountDTO bankAccountDTO) {
 
         return webClientBuilder.build()
                 .get()
-                .uri(customerServiceUrl + "/customers/" + accountDTO.getCustomerId())
+                .uri(customerServiceUrl + "/customers/" + bankAccountDTO.getCustomerId())
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ApiResponse<CustomerDTO>>() {})
-                .flatMap(response -> {
-                    CustomerDTO customer = response.getData();
-                    if (customer != null) {
-                        return repository.save(accountDTO.toEntity())
-                                .map(BankAccountDTO::fromEntity);
-                    } else {
-                        return Mono.error(new RuntimeException("Cliente no encontrado"));
+                .flatMap(rspCustomer -> {
+                    CustomerDTO customer = rspCustomer.getData();
+                    if (customer == null) return Mono.error(new RuntimeException("Cliente no encontrado"));
+
+                    // Verificar tipo de cliente y tipo de cuenta
+
+                    if(customer.getCustomerType().equals(CustomerTypeEnum.EMPRESARIAL) &&
+                            (bankAccountDTO.getAccountType().equals(AccountTypeEnum.AHORRO) || bankAccountDTO.getAccountType().equals(AccountTypeEnum.PLAZO_FIJO))){
+                        return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo"));
+
                     }
+
+                    //check accounts customer
+                    return repository.findAllAccountByCustomerId(bankAccountDTO.getCustomerId())
+                            .collectList()
+                            .flatMap(rspAccounts -> {
+                                System.out.println("Existing Accounts: " + rspAccounts);
+                                //List<BankAccountDTO> rspAccounts = rspAccounts;
+                                if(customer.getCustomerType().equals(CustomerTypeEnum.PERSONAL)){
+                                    boolean hasAccountType = rspAccounts.stream().anyMatch(account -> account.getAccountType().equals(bankAccountDTO.getAccountType()));
+                                    if (hasAccountType) {
+                                        return Mono.error(new RuntimeException("El cliente como maximo puede tener una cuenta de este tipo"));
+                                    }
+                                   /* return repository.save(BankAccountMapper.toEntity(bankAccountDTO))
+                                            .map(BankAccountMapper::toDto);*/
+                                }
+                                return repository.save(BankAccountMapper.toEntity(bankAccountDTO))
+                                        .map(BankAccountMapper::toDto);
+
+                            });
                 })
                 .doOnError(error -> log.error("Error al validar cliente: {}", error.getMessage()));
     }
@@ -51,13 +77,13 @@ public class BankAccountService implements IBankAccountService {
     @Override
     public Flux<BankAccountDTO> findAll() {
         return repository.findAll()
-                .map(this::convertToDTO);
+                .map(BankAccountMapper::toDto);
     }
 
     @Override
     public Mono<BankAccountDTO> findById(String id) {
         return repository.findById(id)
-                .map(this::convertToDTO);
+                .map(BankAccountMapper::toDto);
     }
 
     @Override
@@ -69,7 +95,7 @@ public class BankAccountService implements IBankAccountService {
                     existing.setUpdatedAt(LocalDateTime.now());
                     return repository.save(existing);
                 })
-                .map(this::convertToDTO);
+                .map(BankAccountMapper::toDto);
     }
 
     @Override
@@ -77,12 +103,10 @@ public class BankAccountService implements IBankAccountService {
         return repository.deleteById(id);
     }
 
-    private BankAccountDTO convertToDTO(BankAccount account) {
-        BankAccountDTO dto = new BankAccountDTO();
-        dto.setId(account.getId());
-        dto.setCustomerId(account.getCustomerId());
-        dto.setAccountType(account.getAccountType());
-        dto.setBalance(account.getBalance());
-        return dto;
+    @Override
+    public Flux<BankAccountDTO> findAllAccountByCustomerId(String customerId) {
+        return repository.findAllAccountByCustomerId(customerId);
+
     }
+
 }
