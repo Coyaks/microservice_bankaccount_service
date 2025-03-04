@@ -2,8 +2,11 @@ package com.skoy.bootcamp_microservices.service;
 
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
 import com.skoy.bootcamp_microservices.dto.CustomerDTO;
+import com.skoy.bootcamp_microservices.dto.GetAvailableBalanceDTO;
+import com.skoy.bootcamp_microservices.dto.UpdateBalanceDTO;
 import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
 import com.skoy.bootcamp_microservices.enums.CustomerTypeEnum;
+import com.skoy.bootcamp_microservices.enums.TransactionTypeEnum;
 import com.skoy.bootcamp_microservices.mapper.BankAccountMapper;
 import com.skoy.bootcamp_microservices.model.BankAccount;
 import com.skoy.bootcamp_microservices.repository.IBankAccountRepository;
@@ -18,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,7 +57,7 @@ public class BankAccountService implements IBankAccountService {
                     }
 
                     //check accounts customer
-                    return repository.findAllAccountByCustomerId(bankAccountDTO.getCustomerId())
+                    return repository.findAllByCustomerId(bankAccountDTO.getCustomerId())
                             .collectList()
                             .flatMap(rspAccounts -> {
                                 System.out.println("Existing Accounts: " + rspAccounts);
@@ -63,8 +67,6 @@ public class BankAccountService implements IBankAccountService {
                                     if (hasAccountType) {
                                         return Mono.error(new RuntimeException("El cliente como maximo puede tener una cuenta de este tipo"));
                                     }
-                                   /* return repository.save(BankAccountMapper.toEntity(bankAccountDTO))
-                                            .map(BankAccountMapper::toDto);*/
                                 }
                                 return repository.save(BankAccountMapper.toEntity(bankAccountDTO))
                                         .map(BankAccountMapper::toDto);
@@ -89,11 +91,10 @@ public class BankAccountService implements IBankAccountService {
     @Override
     public Mono<BankAccountDTO> update(String id, BankAccountDTO accountDTO) {
         return repository.findById(id)
-                .flatMap(existing -> {
-                    existing.setAccountType(accountDTO.getAccountType());
-                    existing.setBalance(accountDTO.getBalance());
-                    existing.setUpdatedAt(LocalDateTime.now());
-                    return repository.save(existing);
+                .flatMap(item -> {
+                    item = BankAccountMapper.toEntity(accountDTO);
+                    item.setUpdatedAt(LocalDateTime.now());
+                    return repository.save(item);
                 })
                 .map(BankAccountMapper::toDto);
     }
@@ -104,9 +105,49 @@ public class BankAccountService implements IBankAccountService {
     }
 
     @Override
-    public Flux<BankAccountDTO> findAllAccountByCustomerId(String customerId) {
-        return repository.findAllAccountByCustomerId(customerId);
+    public Flux<BankAccountDTO> findAllByCustomerId(String customerId) {
+        return repository.findAllByCustomerId(customerId);
 
+    }
+
+
+    @Override
+    public Mono<BankAccount> updateBalance(UpdateBalanceDTO updateBalanceDTO) {
+        if (updateBalanceDTO.getProductTypeId() == null || updateBalanceDTO.getProductTypeId().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("El ID de la cuenta bancaria no puede estar vacío"));
+        }
+
+        return repository.findById(updateBalanceDTO.getProductTypeId())
+                .flatMap(account -> {
+                    BigDecimal newBalance;
+                    if (updateBalanceDTO.getTransactionType() == TransactionTypeEnum.DEPOSIT) {
+                        newBalance = account.getAvailableBalance().add(updateBalanceDTO.getAmount());
+                    } else if (updateBalanceDTO.getTransactionType() == TransactionTypeEnum.WITHDRAWAL) {
+                        newBalance = account.getAvailableBalance().subtract(updateBalanceDTO.getAmount());
+                    } else {
+                        return Mono.error(new IllegalArgumentException("Tipo de transacción no válido"));
+                    }
+                    account.setAvailableBalance(newBalance);
+                    return repository.save(account);
+                })
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Cuenta bancaria no encontrada")));
+    }
+
+    @Override
+    public Mono<BigDecimal> getAvailableBalanceByCustomerId(GetAvailableBalanceDTO getAvailableBalanceDTO) {
+        return webClientBuilder.build()
+                .get()
+                .uri(customerServiceUrl + "/customers/" + getAvailableBalanceDTO.getCustomerId())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ApiResponse<CustomerDTO>>() {})
+                .flatMap(response -> {
+                    if (response.getData() == null) return Mono.error(new RuntimeException("Cliente no encontrado"));
+                    return repository.findAllByCustomerId(getAvailableBalanceDTO.getCustomerId())
+                            .filter(account -> account.getAccountType().equals(getAvailableBalanceDTO.getAccountType()))
+                            .singleOrEmpty()
+                            .map(BankAccountDTO::getAvailableBalance)
+                            .switchIfEmpty(Mono.error(new RuntimeException("No se encontró una cuenta con el tipo especificado para el cliente")));
+                });
     }
 
 }

@@ -2,7 +2,10 @@ package com.skoy.bootcamp_microservices.controller;
 
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
 import com.skoy.bootcamp_microservices.dto.CustomerDTO;
+import com.skoy.bootcamp_microservices.dto.GetAvailableBalanceDTO;
+import com.skoy.bootcamp_microservices.dto.UpdateBalanceDTO;
 import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
+import com.skoy.bootcamp_microservices.model.BankAccount;
 import com.skoy.bootcamp_microservices.service.IBankAccountService;
 import com.skoy.bootcamp_microservices.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 
 
 @RestController
@@ -92,9 +97,24 @@ public class BankAccountController {
     }
 
     @GetMapping("/customer/{customerId}")
-    public Flux<BankAccountDTO> findAllBankAccountsByCustomerId(@PathVariable String customerId) {
+    public Flux<BankAccountDTO> findAllByCustomerId(@PathVariable String customerId) {
         logger.info("Fetching all bank_accounts by customer ID: {}", customerId);
-        return service.findAllAccountByCustomerId(customerId);
+        return service.findAllByCustomerId(customerId);
+    }
+
+    @PostMapping("/update_balance")
+    public Mono<ApiResponse<BankAccount>> updateBalance(@RequestBody UpdateBalanceDTO updateBalanceDTO) {
+        logger.info("Updating balance for bank account ID: {}", updateBalanceDTO.getProductTypeId());
+        return service.updateBalance(updateBalanceDTO)
+                .map(updatedAccount -> new ApiResponse<>("Balance actualizado correctamente", updatedAccount, 200))
+                .doOnError(e -> logger.error("Error updating balance for bank account ID: {}", updateBalanceDTO.getProductTypeId(), e));
+    }
+
+    @PostMapping("/check_available_balance")
+    public Mono<ApiResponse<BigDecimal>> getAvailableBalanceByCustomerId(@RequestBody GetAvailableBalanceDTO getAvailableBalanceDTO) {
+        return service.getAvailableBalanceByCustomerId(getAvailableBalanceDTO)
+                .map(balance -> new ApiResponse<>("Saldo disponible encontrado", balance, 200))
+                .doOnError(e -> logger.error("Error fetching available balance for customer ID: {} and account type: {}", getAvailableBalanceDTO.getCustomerId(), getAvailableBalanceDTO.getAccountType(), e));
     }
 
 }

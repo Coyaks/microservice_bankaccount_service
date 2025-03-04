@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 
 public interface IBankAccountRepository extends ReactiveMongoRepository<BankAccount, String> {
-    Flux<BankAccountDTO> findAllAccountByCustomerId(String customerId);
+    Flux<BankAccountDTO> findAllByCustomerId(String customerId);
 }

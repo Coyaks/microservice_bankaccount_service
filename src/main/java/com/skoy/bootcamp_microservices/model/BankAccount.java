@@ -15,11 +15,11 @@ public class BankAccount {
     @Id
     private String id;
     private String customerId;
-    private AccountTypeEnum accountType; // AHORRO, CORRIENTE, PLAZO_FIJO
+    private AccountTypeEnum accountType;
     private String accountNumber;
-    private BigDecimal balance;
-    private List<String> owners; // IDs de titulares (obligatorio: al menos 1)
-    private List<String> authorizedSigners; // IDs de firmantes (opcional)
+    private BigDecimal availableBalance;
+    private List<String> owners;
+    private List<String> authorizedSigners; // (optional)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

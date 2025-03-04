@@ -11,7 +11,9 @@ public class BankAccountMapper {
         account.setCustomerId(dto.getCustomerId());
         account.setAccountType(dto.getAccountType());
         account.setAccountNumber(dto.getAccountNumber());
-        account.setBalance(dto.getBalance());
+        account.setAvailableBalance(dto.getAvailableBalance());
+        account.setOwners(dto.getOwners());
+        account.setAuthorizedSigners(dto.getAuthorizedSigners());
         return account;
     }
 
@@ -22,7 +24,9 @@ public class BankAccountMapper {
         dto.setCustomerId(item.getCustomerId());
         dto.setAccountType(item.getAccountType());
         dto.setAccountNumber(item.getAccountNumber());
-        dto.setBalance(item.getBalance());
+        dto.setAvailableBalance(item.getAvailableBalance());
+        dto.setOwners(item.getOwners());
+        dto.setAuthorizedSigners(item.getAuthorizedSigners());
         return dto;
     }
 
