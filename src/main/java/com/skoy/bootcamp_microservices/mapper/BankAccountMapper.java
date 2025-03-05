@@ -14,6 +14,8 @@ public class BankAccountMapper {
         account.setAvailableBalance(dto.getAvailableBalance());
         account.setOwners(dto.getOwners());
         account.setAuthorizedSigners(dto.getAuthorizedSigners());
+        account.setMaintenanceCommission(dto.getMaintenanceCommission());
+        //account.setMaxFreeTransactions(10);
         return account;
     }
 
@@ -27,6 +29,7 @@ public class BankAccountMapper {
         dto.setAvailableBalance(item.getAvailableBalance());
         dto.setOwners(item.getOwners());
         dto.setAuthorizedSigners(item.getAuthorizedSigners());
+        dto.setMaintenanceCommission(item.getMaintenanceCommission());
         return dto;
     }
 

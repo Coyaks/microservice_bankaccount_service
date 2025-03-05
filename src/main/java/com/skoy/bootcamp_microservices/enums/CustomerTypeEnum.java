@@ -2,5 +2,7 @@ package com.skoy.bootcamp_microservices.enums;
 
 public enum CustomerTypeEnum {
     PERSONAL,
-    EMPRESARIAL
+    EMPRESARIAL,
+    PERSONAL_VIP,
+    EMPRESARIAL_PYME;
 }

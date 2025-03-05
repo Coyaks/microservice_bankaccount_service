@@ -11,7 +11,7 @@
  Target Server Version : 80004 (8.0.4)
  File Encoding         : 65001
 
- Date: 05/03/2025 01:46:23
+ Date: 05/03/2025 08:08:23
 */
 
 
@@ -65,15 +65,67 @@ db.getCollection("bank_accounts").insert([ {
     _class: "com.skoy.bootcamp_microservices.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
-    _id: ObjectId("67bfa9b01226010dfdabfe24"),
-    customerId: "67bc5049652bf702f7552f25",
+    _id: ObjectId("67c8183a5c3a86772242850c"),
+    customerId: "67c80f32d082587cc57705a6",
     accountType: "AHORRO",
     accountNumber: "4213000143603682",
-    availableBalance: "200",
+    availableBalance: "0",
     owners: [
         "owner-id-1",
         "owner-id-2"
     ],
     authorizedSigners: [ ],
+    maintenanceCommission: "0",
+    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+} ]);
+db.getCollection("bank_accounts").insert([ {
+    _id: ObjectId("67c822a6c5323d08f13bab0d"),
+    customerId: "67bc5049652bf702f7552f25",
+    accountType: "AHORRO",
+    accountNumber: "4213000143603682",
+    availableBalance: "12120.00",
+    owners: [
+        "owner-id-1",
+        "owner-id-2"
+    ],
+    authorizedSigners: [ ],
+    maintenanceCommission: "0",
+    maxFreeTransactions: NumberInt("3"),
+    transactionCommission: "5",
+    transactionCount: NumberInt("17"),
+    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+} ]);
+db.getCollection("bank_accounts").insert([ {
+    _id: ObjectId("67c824cdc5323d08f13bab0e"),
+    customerId: "67bc5049652bf702f7552f25",
+    accountType: "CORRIENTE",
+    accountNumber: "1234567890000000",
+    availableBalance: "2000",
+    owners: [
+        "owner-id-1",
+        "owner-id-2"
+    ],
+    authorizedSigners: [ ],
+    maintenanceCommission: "0",
+    maxFreeTransactions: NumberInt("3"),
+    transactionCommission: "5",
+    transactionCount: NumberInt("1"),
+    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+} ]);
+db.getCollection("bank_accounts").insert([ {
+    _id: ObjectId("67c82a650a6f735c96144fa1"),
+    customerId: "67c82a25d082587cc57705a8",
+    accountType: "CORRIENTE",
+    accountNumber: "1234567890000001",
+    availableBalance: "0",
+    owners: [
+        "owner-id-1",
+        "owner-id-2"
+    ],
+    authorizedSigners: [ ],
+    maintenanceCommission: "0",
+    maxFreeTransactions: NumberInt("3"),
+    transactionCommission: "5",
+    transactionCount: NumberInt("1"),
     _class: "com.skoy.bootcamp_microservices.model.BankAccount"
 } ]);

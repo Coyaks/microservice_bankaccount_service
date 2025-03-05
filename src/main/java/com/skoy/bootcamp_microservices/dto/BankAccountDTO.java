@@ -19,4 +19,9 @@ public class BankAccountDTO {
     private BigDecimal availableBalance;
     private List<String> owners;
     private List<String> authorizedSigners;
+    private BigDecimal maintenanceCommission;
+
+    private int maxFreeTransactions;
+    private BigDecimal transactionCommission;
+    private int transactionCount;
 }

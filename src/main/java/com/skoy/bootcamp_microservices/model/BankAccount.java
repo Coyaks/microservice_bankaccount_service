@@ -22,4 +22,10 @@ public class BankAccount {
     private List<String> authorizedSigners; // (optional)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private BigDecimal maintenanceCommission;
+
+    private int maxFreeTransactions = 3;
+    private BigDecimal transactionCommission = BigDecimal.valueOf(5); //
+
+    private int transactionCount; // Nuevo campo para contar las transacciones realizadas
 }
