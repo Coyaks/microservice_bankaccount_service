@@ -1,14 +1,12 @@
 package com.skoy.bootcamp_microservices.controller;
 
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
-import com.skoy.bootcamp_microservices.dto.CustomerDTO;
 import com.skoy.bootcamp_microservices.dto.GetAvailableBalanceDTO;
 import com.skoy.bootcamp_microservices.dto.UpdateBalanceDTO;
 import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
 import com.skoy.bootcamp_microservices.model.BankAccount;
 import com.skoy.bootcamp_microservices.service.IBankAccountService;
 import com.skoy.bootcamp_microservices.utils.ApiResponse;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

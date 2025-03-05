@@ -2,9 +2,9 @@ package com.skoy.bootcamp_microservices.model;
 
 import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

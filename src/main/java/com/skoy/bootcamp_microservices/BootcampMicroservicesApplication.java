@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@SpringBootApplication(scanBasePackages = "com.skoy.bootcamp_microservices")
+@SpringBootApplication
 public class BootcampMicroservicesApplication {
 
 	public static void main(String[] args) {

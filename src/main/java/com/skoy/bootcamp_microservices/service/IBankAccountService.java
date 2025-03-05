@@ -3,7 +3,6 @@ package com.skoy.bootcamp_microservices.service;
 import com.skoy.bootcamp_microservices.dto.BankAccountDTO;
 import com.skoy.bootcamp_microservices.dto.GetAvailableBalanceDTO;
 import com.skoy.bootcamp_microservices.dto.UpdateBalanceDTO;
-import com.skoy.bootcamp_microservices.enums.AccountTypeEnum;
 import com.skoy.bootcamp_microservices.model.BankAccount;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
