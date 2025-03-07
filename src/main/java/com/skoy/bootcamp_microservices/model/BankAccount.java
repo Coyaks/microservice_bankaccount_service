@@ -28,4 +28,5 @@ public class BankAccount {
     private BigDecimal transactionCommission = BigDecimal.valueOf(5); //
 
     private int transactionCount; // Nuevo campo para contar las transacciones realizadas
+    private int monthlyMovementLimit;
 }

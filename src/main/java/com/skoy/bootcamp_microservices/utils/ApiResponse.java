@@ -5,7 +5,9 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private int statusCode;
+    private boolean ok;
     private Object dataExtra;
+
 
     public ApiResponse() {
     }
@@ -14,6 +16,13 @@ public class ApiResponse<T> {
         this.message = message;
         this.data = data;
         this.statusCode = statusCode;
+    }
+
+    public ApiResponse(String message, T data, int statusCode, boolean ok) {
+        this.message = message;
+        this.data = data;
+        this.statusCode = statusCode;
+        this.ok = ok;
     }
 
     public ApiResponse(String message, T data, int statusCode, Object dataExtra) {
@@ -55,4 +64,13 @@ public class ApiResponse<T> {
         this.dataExtra = dataExtra;
     }
 
+    public boolean isOk() {
+        return ok;
+    }
+
+    public void setOk(boolean ok) {
+        this.ok = ok;
+    }
+
 }
+

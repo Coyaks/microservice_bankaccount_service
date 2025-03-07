@@ -39,6 +39,58 @@ public class BankAccountService implements IBankAccountService {
     private String creditServiceUrl;
 
 
+//    @Override
+//    public Mono<BankAccountDTO> create(BankAccountDTO bankAccountDTO) {
+//
+//        if (bankAccountDTO.getAvailableBalance().compareTo(Constants.MIN_OPENING_BALANCE) < 0) {
+//            return Mono.error(new RuntimeException("El monto de apertura no puede ser menor al monto mínimo de apertura"));
+//        }
+//
+//        return getCustomer(bankAccountDTO.getCustomerId())
+//                .flatMap(customer -> {
+//                    if (customer == null) return Mono.error(new RuntimeException("Cliente no encontrado"));
+//
+//                    // Verificar tipo de cliente y tipo de cuenta
+//                    if (customer.getCustomerType().equals(CustomerTypeEnum.EMPRESARIAL) &&
+//                            (bankAccountDTO.getAccountType().equals(AccountTypeEnum.AHORRO)
+//                                    || bankAccountDTO.getAccountType().equals(AccountTypeEnum.PLAZO_FIJO))) {
+//                        return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo"));
+//                    }
+//
+//                    if (customer.getCustomerType() == CustomerTypeEnum.PERSONAL_VIP) {
+//                        // Verificar si el cliente tiene tarjetas de crédito
+//                        return hasCreditCard(bankAccountDTO.getCustomerId())
+//                                .flatMap(hasCreditCard -> {
+//                                    if (!hasCreditCard) {
+//                                        return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
+//                                    }
+//                                    // Check accounts customer
+//                                    return checkCustomerAccountsAndSave(customer, bankAccountDTO);
+//                                });
+//                    } else if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL_PYME) {
+//                        // Verificar si el cliente tiene tarjetas de crédito
+//                        return hasCreditCard(bankAccountDTO.getCustomerId())
+//                                .flatMap(hasCreditCard -> {
+//                                    if (!hasCreditCard) {
+//                                        return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
+//                                    }
+//                                    // Check accounts customer
+//                                    return checkCustomerAccountsAndSave(customer, bankAccountDTO);
+//                                });
+//                    } else {
+//                        if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL &&
+//                                bankAccountDTO.getAccountType() == AccountTypeEnum.CORRIENTE &&
+//                                bankAccountDTO.getMaintenanceCommission().compareTo(BigDecimal.ZERO) <= 0) {
+//                            return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta corriente con comisión de mantenimiento menor o igual a cero"));
+//                        }
+//                        // Check accounts customer
+//                        return checkCustomerAccountsAndSave(customer, bankAccountDTO);
+//                    }
+//                })
+//                .doOnError(error -> log.error("Error al validar cliente: {}", error.getMessage()));
+//    }
+
+
     @Override
     public Mono<BankAccountDTO> create(BankAccountDTO bankAccountDTO) {
 
@@ -50,44 +102,53 @@ public class BankAccountService implements IBankAccountService {
                 .flatMap(customer -> {
                     if (customer == null) return Mono.error(new RuntimeException("Cliente no encontrado"));
 
-                    // Verificar tipo de cliente y tipo de cuenta
-                    if (customer.getCustomerType().equals(CustomerTypeEnum.EMPRESARIAL) &&
-                            (bankAccountDTO.getAccountType().equals(AccountTypeEnum.AHORRO) || bankAccountDTO.getAccountType().equals(AccountTypeEnum.PLAZO_FIJO))) {
-                        return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo"));
-                    }
+                    return hasOverdueDebt(bankAccountDTO.getCustomerId())
+                            .flatMap(hasDebt -> {
+                                if (hasDebt) {
+                                    return Mono.error(new RuntimeException("Un cliente no podrá adquirir un producto si posee alguna deuda vencida en algún producto de crédito"));
+                                }
 
-                    if (customer.getCustomerType() == CustomerTypeEnum.PERSONAL_VIP) {
-                        // Verificar si el cliente tiene tarjetas de crédito
-                        return hasCreditCard(bankAccountDTO.getCustomerId())
-                                .flatMap(hasCreditCard -> {
-                                    if (!hasCreditCard) {
-                                        return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
+                                // Verificar tipo de cliente y tipo de cuenta
+                                if (customer.getCustomerType().equals(CustomerTypeEnum.EMPRESARIAL) &&
+                                        (bankAccountDTO.getAccountType().equals(AccountTypeEnum.AHORRO)
+                                                || bankAccountDTO.getAccountType().equals(AccountTypeEnum.PLAZO_FIJO))) {
+                                    return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo"));
+                                }
+
+                                if (customer.getCustomerType() == CustomerTypeEnum.PERSONAL_VIP) {
+                                    // Verificar si el cliente tiene tarjetas de crédito
+                                    return hasCreditCard(bankAccountDTO.getCustomerId())
+                                            .flatMap(hasCreditCard -> {
+                                                if (!hasCreditCard) {
+                                                    return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
+                                                }
+                                                // Check accounts customer
+                                                return checkCustomerAccountsAndSave(customer, bankAccountDTO);
+                                            });
+                                } else if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL_PYME) {
+                                    // Verificar si el cliente tiene tarjetas de crédito
+                                    return hasCreditCard(bankAccountDTO.getCustomerId())
+                                            .flatMap(hasCreditCard -> {
+                                                if (!hasCreditCard) {
+                                                    return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
+                                                }
+                                                // Check accounts customer
+                                                return checkCustomerAccountsAndSave(customer, bankAccountDTO);
+                                            });
+                                } else {
+                                    if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL &&
+                                            bankAccountDTO.getAccountType() == AccountTypeEnum.CORRIENTE &&
+                                            bankAccountDTO.getMaintenanceCommission().compareTo(BigDecimal.ZERO) <= 0) {
+                                        return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta corriente con comisión de mantenimiento menor o igual a cero"));
                                     }
                                     // Check accounts customer
                                     return checkCustomerAccountsAndSave(customer, bankAccountDTO);
-                                });
-                    } else if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL_PYME) {
-                        // Verificar si el cliente tiene tarjetas de crédito
-                        return hasCreditCard(bankAccountDTO.getCustomerId())
-                                .flatMap(hasCreditCard -> {
-                                    if (!hasCreditCard) {
-                                        return Mono.error(new RuntimeException("El cliente debe tener una tarjeta de crédito con el banco para solicitar este producto"));
-                                    }
-                                    // Check accounts customer
-                                    return checkCustomerAccountsAndSave(customer, bankAccountDTO);
-                                });
-                    } else {
-                        if (customer.getCustomerType() == CustomerTypeEnum.EMPRESARIAL &&
-                                bankAccountDTO.getAccountType() == AccountTypeEnum.CORRIENTE &&
-                                bankAccountDTO.getMaintenanceCommission().compareTo(BigDecimal.ZERO) <= 0) {
-                            return Mono.error(new RuntimeException("Un cliente empresarial no puede tener una cuenta corriente con comisión de mantenimiento menor o igual a cero"));
-                        }
-                        // Check accounts customer
-                        return checkCustomerAccountsAndSave(customer, bankAccountDTO);
-                    }
+                                }
+                            });
                 })
                 .doOnError(error -> log.error("Error al validar cliente: {}", error.getMessage()));
     }
+
 
     private Mono<CustomerDTO> getCustomer(String customerId) {
         String customerUri = customerServiceUrl + "/customers/" + customerId;
@@ -111,6 +172,17 @@ public class BankAccountService implements IBankAccountService {
                 .map(creditCards -> !creditCards.isEmpty());
     }
 
+    private Mono<Boolean> hasOverdueDebt(String customerId) {
+        String url = creditServiceUrl + "/credits/debt/" + customerId;
+        return webClientBuilder.build()
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ApiResponse<Object>>() {
+                })
+                .map(ApiResponse::isOk);
+    }
+
 
     private Mono<BankAccountDTO> checkCustomerAccountsAndSave(CustomerDTO customer, BankAccountDTO bankAccountDTO) {
         return repository.findAllByCustomerId(bankAccountDTO.getCustomerId())
@@ -123,7 +195,13 @@ public class BankAccountService implements IBankAccountService {
                             return Mono.error(new RuntimeException("El cliente como máximo puede tener una cuenta de este tipo"));
                         }
                     }
-                    return repository.save(BankAccountMapper.toEntity(bankAccountDTO))
+                    BankAccount bankAccount = BankAccountMapper.toEntity(bankAccountDTO);
+                    if (bankAccountDTO.getAccountType() == AccountTypeEnum.AHORRO || bankAccountDTO.getAccountType() == AccountTypeEnum.PLAZO_FIJO) {
+                        bankAccount.setMaintenanceCommission(BigDecimal.valueOf(0));
+                    } else {
+                        bankAccount.setMaintenanceCommission(Constants.MAINTENANCE_COMMISSION);
+                    }
+                    return repository.save(bankAccount)
                             .map(BankAccountMapper::toDto);
                 });
     }
