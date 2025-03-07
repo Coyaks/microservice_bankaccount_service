@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.skoy</groupId>
-	<artifactId>bootcamp_microservices</artifactId>
+	<artifactId>bankaccount_service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>bootcamp_microservices</name>
+	<name>bankaccount_service</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -68,6 +68,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+			<version>4.2.0</version>
 		</dependency>
 	</dependencies>
 

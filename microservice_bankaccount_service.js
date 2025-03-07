@@ -28,20 +28,20 @@ db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67be9698e61c0c396f37e0f0"),
     customerId: "67be562286d43e7cd15520ce",
     accountType: "AHORRO",
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67beb6597db31419cd5e7be0"),
     customerId: "67beb2df5c8259362896dff6",
     accountType: "CORRIENTE",
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67beba044c7b7549f813c255"),
     customerId: "67beb2df5c8259362896dff6",
     accountType: "CORRIENTE",
     balance: "0",
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67bebf173fd10350de01fe01"),
@@ -49,7 +49,7 @@ db.getCollection("bank_accounts").insert([ {
     accountType: "CORRIENTE",
     accountNumber: "4213000143603682",
     balance: "0",
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67bf5459a19db802221491b5"),
@@ -62,7 +62,7 @@ db.getCollection("bank_accounts").insert([ {
         "owner-id-2"
     ],
     authorizedSigners: [ ],
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67c8183a5c3a86772242850c"),
@@ -76,7 +76,7 @@ db.getCollection("bank_accounts").insert([ {
     ],
     authorizedSigners: [ ],
     maintenanceCommission: "0",
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67c822a6c5323d08f13bab0d"),
@@ -93,7 +93,7 @@ db.getCollection("bank_accounts").insert([ {
     maxFreeTransactions: NumberInt("3"),
     transactionCommission: "5",
     transactionCount: NumberInt("17"),
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67c824cdc5323d08f13bab0e"),
@@ -110,7 +110,7 @@ db.getCollection("bank_accounts").insert([ {
     maxFreeTransactions: NumberInt("3"),
     transactionCommission: "5",
     transactionCount: NumberInt("1"),
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
 db.getCollection("bank_accounts").insert([ {
     _id: ObjectId("67c82a650a6f735c96144fa1"),
@@ -127,5 +127,5 @@ db.getCollection("bank_accounts").insert([ {
     maxFreeTransactions: NumberInt("3"),
     transactionCommission: "5",
     transactionCount: NumberInt("1"),
-    _class: "com.skoy.bootcamp_microservices.model.BankAccount"
+    _class: "com.skoy.bankaccount_service.model.BankAccount"
 } ]);
